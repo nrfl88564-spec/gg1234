@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ตาชั่งแก้สมการ V10</title>
+<style>
+  :root,html[data-theme="original"]{
+    --bg:#dff1fb; --card:#ffffff; --card-border:#e6f1f8; --shadow:0 8px 24px rgba(38,72,92,.10);
+    --ink:#26485c; --muted:#7b97a6;
+    --green:#3fbf8a; --green-dark:#2c9c6e; --green-pale:#e3f8ef; --on-green:#fff;
+    --line:#e6f1f8; --line2:#dcebf3; --zone:#eef8fe; --btn-bg:#ffffff; --chip-bg:#ffffff; --chipn:#2a6fb0;
+    --warn-bg:#fff6e0; --warn-ink:#9a7300; --err-bg:#fdecee; --err-ink:#c23a48;
+    --m1:#e8f1f6; --m2:#ffffff; --m3:#d5e3ec; --metal-stroke:var(--metal-stroke); --beam:var(--beam); --string:var(--string);
+    --pan:#ffffff; --knob:#ffffff; --dot-off:#c7dbe6;
+    --radius:18px; --font:"Noto Sans Thai",system-ui,sans-serif;
+  }
+  html[data-theme="sea"]{
+    --bg:linear-gradient(180deg,#c9f4f2 0%,#6fd0dc 40%,#1c93b8 100%);
+    --card:rgba(255,255,255,.86); --card-border:rgba(255,255,255,.7); --shadow:0 10px 28px rgba(8,70,96,.22);
+    --ink:#0f3d52; --muted:#4f8196;
+    --green:#14b8a6; --green-dark:#0c8577; --green-pale:#d5f6f0; --on-green:#fff;
+    --line:#cdeaf0; --line2:#b7dde6; --zone:rgba(214,243,247,.8); --btn-bg:#ffffff; --chip-bg:#ffffff; --chipn:#1a6fa8;
+    --m1:#f3e4c4; --m2:#fff8e6; --m3:#e2cd9f; --metal-stroke:#c9ad72; --beam:#c9a15c; --string:#d9c08a;
+    --pan:#fffaf0; --knob:#fff8e6; --dot-off:#d7c49a;
+  }
+  html[data-theme="night"]{
+    --bg:linear-gradient(180deg,#080e2b 0%,#1a1f4d 60%,#2c2a66 100%);
+    --card:rgba(27,33,80,.82); --card-border:rgba(150,160,255,.25); --shadow:0 10px 30px rgba(0,0,20,.5);
+    --ink:#e8ecff; --muted:#9aa3d6;
+    --green:#1fa97a; --green-dark:#7ff0c3; --green-pale:rgba(70,230,170,.14); --on-green:#fff;
+    --line:rgba(150,160,255,.22); --line2:rgba(150,160,255,.32); --zone:rgba(255,255,255,.05);
+    --btn-bg:rgba(255,255,255,.08); --chip-bg:rgba(255,255,255,.09); --chipn:#8cc2ff;
+    --warn-bg:#3a3320; --warn-ink:#ffd76a; --err-bg:#3d2230; --err-ink:#ff9aa8;
+    --m1:#aeb8e8; --m2:#eef1ff; --m3:#8e98cf; --metal-stroke:#7480c4; --beam:#8f9ae0; --string:#7f8bd0;
+    --pan:#dfe4ff; --knob:#eef1ff; --dot-off:#6a73b5;
+  }
+  html[data-theme="candy"]{
+    --bg:linear-gradient(160deg,#ffe0ef 0%,#f1dcff 55%,#d9e8ff 100%);
+    --card:rgba(255,255,255,.9); --card-border:#fbdcec; --shadow:0 10px 26px rgba(200,90,150,.18);
+    --ink:#5a3a6e; --muted:#a58bb8;
+    --green:#f46fa2; --green-dark:#d03d82; --green-pale:#ffe6f1; --on-green:#fff;
+    --line:#f6dcec; --line2:#f0cbe2; --zone:#fff1f8; --btn-bg:#ffffff; --chip-bg:#ffffff; --chipn:#7a5ad6;
+    --m1:#f1e2ff; --m2:#ffffff; --m3:#dcc5f5; --metal-stroke:#d3b4ee; --beam:#c9a6ea; --string:#d9bdf0;
+    --pan:#ffffff; --knob:#ffffff; --dot-off:#dcc5f5;
+    --radius:26px;
+  }
+  html[data-theme="chalk"]{
+    --bg:radial-gradient(ellipse at 30% 10%,#2f574b 0%,#223f37 70%);
+    --card:rgba(255,255,255,.06); --card-border:rgba(244,241,230,.45); --shadow:none;
+    --ink:#f4f1e6; --muted:#b4c7ba;
+    --green:#f2d16b; --green-dark:#f7e08f; --green-pale:rgba(242,209,107,.16); --on-green:#2a2a1c;
+    --line:rgba(244,241,230,.25); --line2:rgba(244,241,230,.4); --zone:rgba(255,255,255,.05);
+    --btn-bg:rgba(255,255,255,.08); --chip-bg:rgba(255,255,255,.09); --chipn:#9fd4ff;
+    --warn-bg:rgba(242,209,107,.18); --warn-ink:#f7e08f; --err-bg:rgba(255,130,130,.18); --err-ink:#ffb0b0;
+    --m1:#e9e6dc; --m2:#fffdf5; --m3:#cfcabb; --metal-stroke:#f4f1e6; --beam:#f4f1e6; --string:#d9d6c8;
+    --pan:#fffdf5; --knob:#fffdf5; --dot-off:#b8b5a8;
+    --radius:10px; --font:"Mali","Noto Sans Thai",cursive;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg);background-attachment:fixed}
+  html,body{margin:0;color:var(--ink);font-family:var(--font);line-height:1.6}
+  #deco{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  #col{position:relative;z-index:1}
+  #themeBar{display:flex;gap:6px;overflow-x:auto;padding:2px 0}
+  .tpill{flex:none;font:inherit;font-size:12.5px;font-weight:700;border:2px solid var(--line2);background:var(--btn-bg);
+    color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+  .tpill.on{background:var(--green);border-color:var(--green);color:var(--on-green)}
+  html[data-theme="chalk"] .card{border-style:dashed;border-width:2px}
+  html[data-theme="candy"] .btn,html[data-theme="candy"] .opslot,html[data-theme="candy"] .zone{border-radius:18px}
+  body{min-height:100vh;background:transparent;display:flex;justify-content:center;padding:18px 14px 60px}
+  #col{width:100%;max-width:560px;display:flex;flex-direction:column;gap:16px}
+
+  .card{background:var(--card);border-radius:var(--radius);padding:16px 18px;
+    box-shadow:var(--shadow);border:1px solid var(--card-border);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .card h2{margin:0 0 10px;font-size:15px;color:var(--muted);font-weight:700}
+
+  /* แถบบนสุด */
+  #topbar{display:flex;gap:10px}
+  .btn{font:inherit;font-weight:700;border:none;border-radius:13px;cursor:pointer;padding:12px 14px;
+    font-size:14px;transition:transform .08s}
+  .btn:active{transform:scale(.96)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-outline{background:var(--btn-bg);color:var(--ink);border:2px solid var(--line2);flex:1}
+  .btn-green{background:var(--green);color:var(--on-green);flex:1}
+  .btn-ghost{background:var(--btn-bg);color:var(--ink)}
+
+  /* การ์ดตัวแก้สมการ */
+  #solverCard{display:none}
+  #solverCard.show{display:block}
+  .eqline{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+  .eqline .tag{font-size:12px;color:var(--muted);min-width:92px}
+  .eqline .val{font-size:22px;font-weight:800;letter-spacing:.3px}
+  #eqInit .val{color:var(--ink)}
+  #eqNow .val{color:var(--green-dark)}
+
+  .opgroup{display:flex;gap:10px;margin-top:14px}
+  #eqRow{display:flex;gap:10px;align-items:stretch}
+  #eqCol{flex:1;min-width:0}
+  #slotX{flex:none;width:150px;padding:6px}
+  #slotX .stepper{gap:6px}
+  #slotX .big{font-size:20px}
+  .opslot{flex:1;border:2px dashed var(--line2);border-radius:14px;min-height:76px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--muted);font-size:13px;padding:8px}
+  .opslot.active{border-style:solid;border-color:var(--green);background:var(--green-pale);cursor:default}
+  .opslot .stepper{display:flex;align-items:center;gap:12px}
+  .opslot .big{font-size:22px;font-weight:800;color:var(--ink);min-width:60px;text-align:center}
+  .arrow{width:34px;height:34px;border-radius:10px;border:none;background:var(--chip-bg);box-shadow:0 2px 6px rgba(0,0,0,.18);
+    font-size:16px;color:var(--green-dark);cursor:pointer;font-weight:800}
+  .arrow:active{transform:scale(.92)}
+
+  
+  #feedback{margin-top:12px;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;display:none}
+  #feedback.ok{display:block;background:var(--green-pale);color:var(--green-dark)}
+  #feedback.pending{display:block;background:var(--warn-bg);color:var(--warn-ink)}
+
+  #steps{display:none;margin-top:14px;border-top:1px dashed var(--line2);padding-top:10px}
+  #steps.show{display:block}
+  #steps ol{margin:0;padding-left:20px;font-size:13px;color:var(--ink)}
+  #steps li{margin-bottom:6px}
+
+  /* ตาชั่ง */
+  #scaleWrap{padding:6px 0 0}
+  svg#scale{color:var(--ink);width:100%;height:auto;display:block}
+  #scaleStatus{text-align:center;font-size:13px;color:var(--muted);margin-top:-4px}
+
+  /* ตัวสร้างสมการ */
+  #zones{display:flex;gap:12px;margin-bottom:14px}
+  .zone{flex:1;background:var(--zone);border:2px solid var(--line);border-radius:14px;padding:12px;min-height:84px;
+    display:flex;flex-direction:column;gap:6px}
+  .zone .zlabel{font-size:12px;color:var(--muted);font-weight:700}
+  .zone.hover{border-color:var(--green);background:var(--green-pale)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:32px}
+  .chip{background:var(--chip-bg);border:2px solid var(--line2);border-radius:999px;padding:5px 12px;font-weight:800;
+    font-size:15px;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink)}
+  .chip small{color:var(--muted);font-weight:700;font-size:12px}
+  .chip.x{color:var(--green-dark)}
+  .chip.n{color:var(--chipn)}
+  .zone .empty{color:var(--muted);font-size:13px}
+
+  #tray{display:flex;gap:12px;justify-content:center;margin-top:4px;flex-wrap:wrap}
+  .blk{width:66px;height:66px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;
+    cursor:grab;touch-action:none;box-shadow:0 5px 0 rgba(0,0,0,.14),0 8px 12px rgba(38,72,92,.18);
+    border:3px solid rgba(255,255,255,.75)}
+  .circle{border-radius:50%} .square{border-radius:16px}
+  .b-p1{background:linear-gradient(160deg,#7cc4f8,#3b9be6);color:#fff}
+  .b-n1{background:linear-gradient(160deg,#ff8f98,#ec5563);color:#fff}
+  .b-px{background:linear-gradient(160deg,#6fdcaa,#2fb877);color:#fff}
+  .b-nx{background:linear-gradient(160deg,#ffe07a,#f4bf2c);color:#5a4300}
+.btn-sm{padding:6px 11px;font-size:12px;border-radius:10px;flex:none}
+  #actionbar{display:flex;gap:8px;align-items:center}
+  #actionbar #lockBtn{flex:1}
+  #actionbar #distributeBtn{flex:1}
+  .fly{position:fixed;z-index:80;pointer-events:none;left:0;top:0;padding:6px 14px;border-radius:999px;
+    background:var(--green);color:var(--on-green);font-weight:800;font-size:20px;box-shadow:0 6px 14px rgba(38,72,92,.3)}
+  .puff{position:fixed;z-index:79;pointer-events:none;left:0;top:0;width:34px;height:34px;border-radius:50%;
+    background:radial-gradient(circle,#fff 0%,#e4eef4 55%,rgba(200,215,225,0) 75%)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-size:.62em;line-height:1.1;vertical-align:middle;margin:0 2px}
+  .frac span:first-child{border-bottom:2px solid currentColor;padding:0 3px}
+  .cloud{position:absolute;background:#fff;border-radius:999px;filter:blur(6px);animation:drift linear infinite}
+  @keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+  .bubble{position:absolute;bottom:-30px;border-radius:50%;border:2px solid rgba(255,255,255,.7);
+    background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7),rgba(255,255,255,.1));animation:rise linear infinite}
+  @keyframes rise{to{transform:translateY(-110vh) translateX(20px)}}
+  .wave{position:absolute;left:0;bottom:0;width:200%;height:110px;animation:waveMove 14s linear infinite}
+  .wave.w2{height:80px;animation-duration:9s;animation-direction:reverse}
+  @keyframes waveMove{to{transform:translateX(-50%)}}
+  .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+  .moon{position:absolute;right:9%;top:7%;width:64px;height:64px;border-radius:50%;
+    box-shadow:-14px 6px 0 0 #fdf3c8;filter:drop-shadow(0 0 14px rgba(253,243,200,.7))}
+  .shoot{position:absolute;left:-10%;top:18%;width:120px;height:2px;background:linear-gradient(90deg,transparent,#fff);
+    transform:rotate(20deg);animation:shoot 9s ease-in infinite}
+  @keyframes shoot{0%,70%{transform:translate(0,0) rotate(20deg);opacity:0}72%{opacity:1}100%{transform:translate(120vw,45vh) rotate(20deg);opacity:0}}
+  .candy{position:absolute;bottom:-70px;border-radius:50%;opacity:.55;animation:rise linear infinite}
+  .doodle{position:absolute;color:rgba(244,241,230,.16);font-weight:700;white-space:nowrap}
+  #ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-50%) rotate(-6deg);display:none;opacity:.95}
+
+  #builderBtns{display:flex;gap:10px;margin-top:14px}
+  #lockMsg{margin-top:10px;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;display:none;background:var(--err-bg);color:var(--err-ink)}
+  #lockMsg.show{display:block}
+  #lockedNote{display:none;text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
+  #lockedNote.show{display:block}
+</style>
+</head>
+<body>
+<div id="deco"></div>
+<div id="col">
+
+  <div id="themeBar"></div>
+
+  <div id="topbar">
+    <button class="btn btn-outline" id="stepsBtn" disabled>📖 เปิดดูวิธีทำ</button>
+    <button class="btn btn-green" id="checkBtn" disabled>✓ เช็คคำตอบ</button>
+  </div>
+
+  <div class="card" id="solverCard">
+    <h2>ตัวแก้สมการ</h2>
+    <div id="eqRow">
+    <div id="eqCol">
+    <div class="eqline" id="eqInit"><span class="tag">สมการเริ่มต้น</span><span class="val">-</span></div>
+    <div class="eqline" id="eqNow"><span class="tag">สมการปัจจุบัน</span><span class="val">-</span></div>
+    </div>
+    <div class="opslot" id="slotX" data-mode="addx">
+      <span>แตะเพื่อ บวก / ลบ x</span>
+    </div>
+    </div>
+
+    <div class="opgroup">
+      <div class="opslot" id="slotAdd" data-mode="add">
+        <span id="addPlaceholder">แตะเพื่อ บวก / ลบ</span>
+      </div>
+      <div class="opslot" id="slotMul" data-mode="mul">
+        <span id="mulPlaceholder">แตะเพื่อ คูณ</span>
+      </div>
+    </div>
+    <div id="feedback"></div>
+    <div id="steps"><ol id="stepsList"></ol></div>
+  </div>
+
+  <div class="card" id="actionbar">
+    <button class="btn btn-outline btn-sm" id="clearBtn">ล้าง</button>
+    <button class="btn btn-green btn-sm" id="lockBtn">ตั้งสมการ ✓</button>
+    <button class="btn btn-green btn-sm" id="distributeBtn" disabled>แจกแจง</button>
+  </div>
+
+  <div class="card" id="scaleWrap">
+    <svg id="scale" viewBox="0 0 520 300" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="gp1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7cc4f8"/><stop offset="1" stop-color="#3b9be6"/></linearGradient>
+        <linearGradient id="gn1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8f98"/><stop offset="1" stop-color="#ec5563"/></linearGradient>
+        <linearGradient id="gpx" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6fdcaa"/><stop offset="1" stop-color="#2fb877"/></linearGradient>
+        <linearGradient id="gnx" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe07a"/><stop offset="1" stop-color="#f4bf2c"/></linearGradient>
+        <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--m1)"/><stop offset=".5" stop-color="var(--m2)"/><stop offset="1" stop-color="var(--m3)"/></linearGradient>
+        <filter id="sh" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#26485c" flood-opacity=".25"/></filter>
+      </defs>
+      <ellipse cx="260" cy="268" rx="150" ry="14" fill="currentColor" opacity=".12"/>
+      <path d="M190 262 Q190 238 216 238 L304 238 Q330 238 330 262 Z" fill="url(#metal)" stroke="var(--metal-stroke)" stroke-width="3"/>
+      <rect x="246" y="60" width="18" height="202" rx="8" fill="url(#metal)" stroke="var(--metal-stroke)" stroke-width="3"/>
+      <circle cx="255" cy="56" r="13" fill="var(--knob)" stroke="var(--metal-stroke)" stroke-width="3"/>
+      <g id="dyn"></g>
+    </svg>
+    <div id="scaleStatus">ยังไม่ได้ตั้งสมการ</div>
+  </div>
+
+  <div class="card" id="builderCard">
+    <h2>ตัวสร้างสมการ</h2>
+    <div id="zones">
+      <div class="zone" id="zoneL" data-side="L">
+        <div class="zlabel">ฝั่งซ้าย</div>
+        <div class="chips" id="chipsL"><span class="empty">ว่าง</span></div>
+      </div>
+      <div class="zone" id="zoneR" data-side="R">
+        <div class="zlabel">ฝั่งขวา</div>
+        <div class="chips" id="chipsR"><span class="empty">ว่าง</span></div>
+      </div>
+    </div>
+    <div id="tray">
+      <div class="blk circle b-p1" data-t="p1">1</div>
+      <div class="blk circle b-n1" data-t="n1">-1</div>
+      <div class="blk square b-px" data-t="px">x</div>
+      <div class="blk square b-nx" data-t="nx">-x</div>
+    </div>
+    <div id="lockMsg"></div>
+    <div id="lockedNote">สมการถูกตั้งแล้ว — ไปแก้ไขด้านบนได้เลย</div>
+  </div>
+
+</div>
+<div id="ghost" class="blk"></div>
+
+<script>
+/* ---------- state ---------- */
+let L = {x:0, n:0}, R = {x:0, n:0};   // ตัวสร้างสมการ (merge อัตโนมัติ)
+let locked = false;
+let eq = null;                         // {A,B,C,D} -> A x + B = C x + D
+let initStr = '';
+let xSol = null;
+let opMode = 'none';                   // none | add | mul
+let addVal = 1;
+let addX = 1;
+let mulK = 2;                          // |k|>=2 ; k>0 คูณ, k<0 หาร
+let steps = [];
+let angle = 0;
+
+const svg = document.getElementById('scale');
+const dyn = document.getElementById('dyn');
+const ghost = document.getElementById('ghost');
+
+/* ---------- helpers ---------- */
+const gcd = (a,b) => b ? gcd(b, a % b) : Math.abs(a);
+function F(n, d = 1){ if (d < 0){ n = -n; d = -d; } const g = gcd(n, d) || 1; return {n:n/g, d:d/g}; }
+const toF = v => (typeof v === 'object') ? v : F(v);
+const fadd = (a,b) => F(a.n*b.d + b.n*a.d, a.d*b.d);
+const fmul = (a,b) => F(a.n*b.n, a.d*b.d);
+const fnum = f => f.n / f.d;
+const fz = f => f.n === 0;
+const fracHtml = (n,d) => `<span class="frac"><span>${n}</span><span>${d}</span></span>`;
+function termHtml(f, suf){
+  const sign = f.n < 0 ? '-' : '', a = Math.abs(f.n);
+  const body = f.d === 1 ? ((suf && a === 1) ? '' : String(a)) : fracHtml(a, f.d);
+  return sign + body + suf;
+}
+function fmtExpr(x, n){
+  const xf = toF(x), nf = toF(n);
+  let out = '';
+  if (!fz(xf)) out = termHtml(xf, 'x');
+  if (!fz(nf)){
+    if (out) out += (nf.n > 0 ? ' + ' : ' - ') + termHtml(F(Math.abs(nf.n), nf.d), '');
+    else out = termHtml(nf, '');
+  }
+  return out || '0';
+}
+function fHtml(f){ return termHtml(f, ''); }
+
+/* ---------- ตัวสร้างสมการ ---------- */
+function renderChips(side){
+  const s = side === 'L' ? L : R;
+  const el = document.getElementById('chips' + side);
+  el.innerHTML = '';
+  if (s.x === 0 && s.n === 0){ el.innerHTML = '<span class="empty">ว่าง</span>'; return; }
+  if (s.x !== 0){
+    const c = document.createElement('span');
+    c.className = 'chip x'; c.title = 'แตะเพื่อลบออกทีละ 1 ชิ้น';
+    c.innerHTML = (s.x===1?'x':s.x===-1?'-x':s.x+'x') + ' <small>x</small>';
+    c.onclick = () => { s.x += s.x > 0 ? -1 : 1; renderChips(side); };
+    el.appendChild(c);
+  }
+  if (s.n !== 0){
+    const c = document.createElement('span');
+    c.className = 'chip n'; c.title = 'แตะเพื่อลบออกทีละ 1 ชิ้น';
+    c.innerHTML = s.n + ' <small>จำนวน</small>';
+    c.onclick = () => { s.n += s.n > 0 ? -1 : 1; renderChips(side); };
+    el.appendChild(c);
+  }
+}
+function addToSide(side, t){
+  if (locked) return;
+  const s = side === 'L' ? L : R;
+  if (t === 'p1') s.n++;
+  else if (t === 'n1') s.n--;
+  else if (t === 'px') s.x++;
+  else if (t === 'nx') s.x--;
+  renderChips(side);
+}
+
+let panPts = {L:{x:150,y:70}, R:{x:370,y:70}};
+function svgToScreen(x, y){
+  const p = svg.createSVGPoint(); p.x = x; p.y = y;
+  return p.matrixTransform(svg.getScreenCTM());
+}
+
+/* drag from tray */
+let drag = null, hoverZone = null;
+document.querySelectorAll('#tray .blk').forEach(el => {
+  el.addEventListener('pointerdown', e => {
+    if (locked) return;
+    e.preventDefault();
+    drag = el.dataset.t;
+    ghost.className = 'blk ' + (t=>['px','nx'].includes(t)?'square':'circle')(drag) + ' b-' + drag;
+    ghost.textContent = el.textContent;
+    ghost.style.display = 'flex';
+    move(e);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  });
+});
+function move(e){
+  if (!drag) return;
+  ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px';
+  const zl = document.getElementById('zoneL').getBoundingClientRect();
+  const zr = document.getElementById('zoneR').getBoundingClientRect();
+  const inZ = r => e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+  const pr = side => { const p = panPts[side];
+    const a = svgToScreen(p.x-100, p.y+80), b = svgToScreen(p.x+100, p.y+205);
+    return {left:a.x, top:a.y, right:b.x, bottom:b.y}; };
+  hoverZone = inZ(pr('L')) ? 'L' : inZ(pr('R')) ? 'R' : inZ(zl) ? 'L' : inZ(zr) ? 'R' : null;
+  document.getElementById('zoneL').classList.toggle('hover', hoverZone==='L');
+  document.getElementById('zoneR').classList.toggle('hover', hoverZone==='R');
+}
+function up(){
+  window.removeEventListener('pointermove', move);
+  window.removeEventListener('pointerup', up);
+  ghost.style.display = 'none';
+  document.getElementById('zoneL').classList.remove('hover');
+  document.getElementById('zoneR').classList.remove('hover');
+  if (drag && hoverZone) addToSide(hoverZone, drag);
+  drag = null; hoverZone = null;
+}
+// แตะบล็อกเฉยๆ = ใส่ฝั่งซ้ายเร็วๆ (ทางลัดบนมือถือ)
+document.querySelectorAll('#tray .blk').forEach(el => {
+  el.addEventListener('click', () => { if (!locked) addToSide('L', el.dataset.t); });
+});
+
+document.getElementById('clearBtn').onclick = () => {
+  L = {x:0,n:0}; R = {x:0,n:0}; renderChips('L'); renderChips('R');
+  document.getElementById('lockMsg').className = '';
+};
+
+document.getElementById('lockBtn').onclick = () => {
+  const msg = document.getElementById('lockMsg');
+  if (L.x===0 && L.n===0 && R.x===0 && R.n===0){
+    msg.textContent = 'กรุณาใส่บล็อกอย่างน้อยหนึ่งชิ้นก่อนตั้งสมการ';
+    msg.className = 'show'; return;
+  }
+  const a = L.x - R.x, b = R.n - L.n;
+  if (a === 0){
+    msg.textContent = 'สมการนี้ไม่ถูกต้องหรือหาค่าไม่ได้ (ตัวแปร x หักล้างกันหมด) ลองแก้ไขบล็อกใหม่';
+    msg.className = 'show'; return;
+  }
+  msg.className = '';
+  xSol = b / a;
+  eq = {A:F(L.x), B:F(L.n), C:F(R.x), D:F(R.n)};
+  initStr = fmtExpr(eq.A, eq.B) + ' = ' + fmtExpr(eq.C, eq.D);
+  locked = true; steps = []; opMode = 'none';
+  document.getElementById('eqInit').querySelector('.val').innerHTML = initStr;
+  document.getElementById('solverCard').classList.add('show');
+  document.getElementById('lockedNote').classList.add('show');
+  document.getElementById('stepsBtn').disabled = false;
+  document.getElementById('checkBtn').disabled = false;
+  document.getElementById('feedback').className = '';
+  document.getElementById('steps').className = '';
+  updateOpUI();
+  updateEqNow();
+};
+
+/* ---------- ตัวแก้สมการ ---------- */
+function updateEqNow(){
+  document.getElementById('eqNow').querySelector('.val').innerHTML =
+    fmtExpr(eq.A, eq.B) + ' = ' + fmtExpr(eq.C, eq.D);
+}
+function updateOpUI(){
+  const slotAdd = document.getElementById('slotAdd');
+  const slotMul = document.getElementById('slotMul');
+  slotAdd.classList.toggle('active', opMode==='add');
+  slotMul.classList.toggle('active', opMode==='mul');
+  const slotX = document.getElementById('slotX');
+  slotX.classList.toggle('active', opMode==='addx');
+  if (opMode === 'addx'){
+    const xl = (addX>0?'+':'−') + (Math.abs(addX)===1?'':Math.abs(addX)) + 'x';
+    slotX.innerHTML = `<div class="stepper">
+      <button class="arrow" id="xDown">▼</button>
+      <span class="big" style="min-width:50px">${xl}</span>
+      <button class="arrow" id="xUp">▲</button></div>`;
+    document.getElementById('xUp').onclick = e => { e.stopPropagation(); addX++; if (addX===0) addX=1; updateOpUI(); };
+    document.getElementById('xDown').onclick = e => { e.stopPropagation(); addX--; if (addX===0) addX=-1; updateOpUI(); };
+  } else {
+    slotX.innerHTML = '<span>แตะเพื่อ บวก / ลบ x</span>';
+  }
+
+  if (opMode === 'add'){
+    slotAdd.innerHTML = `<div class="stepper">
+      <button class="arrow" id="addDown">▼</button>
+      <span class="big">${addVal>0?'+':''}${addVal}</span>
+      <button class="arrow" id="addUp">▲</button></div>`;
+    document.getElementById('addUp').onclick = e => { e.stopPropagation(); addVal++; updateOpUI(); };
+    document.getElementById('addDown').onclick = e => { e.stopPropagation(); addVal--; updateOpUI(); };
+  } else {
+    slotAdd.innerHTML = '<span id="addPlaceholder">แตะเพื่อ บวก / ลบ</span>';
+  }
+
+  if (opMode === 'mul'){
+    const label = mulK >= 2 ? ('× ' + mulK) : ('× ' + fracHtml(1, Math.abs(mulK)));
+    slotMul.innerHTML = `<div class="stepper">
+      <button class="arrow" id="mulDown">▼</button>
+      <span class="big" style="min-width:90px">${label}</span>
+      <button class="arrow" id="mulUp">▲</button></div>`;
+    document.getElementById('mulUp').onclick = e => { e.stopPropagation(); mulK = nextUp(mulK); updateOpUI(); };
+    document.getElementById('mulDown').onclick = e => { e.stopPropagation(); mulK = nextDown(mulK); updateOpUI(); };
+  } else {
+    slotMul.innerHTML = '<span id="mulPlaceholder">แตะเพื่อ คูณ</span>';
+  }
+
+  document.getElementById('distributeBtn').disabled = (opMode === 'none');
+}
+function nextUp(k){ if (k === -2) return 2; return k + 1; }
+function nextDown(k){ if (k === 2) return -2; return k - 1; }
+
+document.getElementById('slotAdd').addEventListener('click', () => { if(!locked) return; if (opMode!=='add'){ opMode='add'; updateOpUI(); } });
+document.getElementById('slotX').addEventListener('click', () => { if(!locked) return; if (opMode!=='addx'){ opMode='addx'; updateOpUI(); } });
+document.getElementById('slotMul').addEventListener('click', () => { if(!locked) return; if (opMode!=='mul'){ opMode='mul'; updateOpUI(); } });
+
+let busy = false;
+function flyTo(text, from, side){
+  return new Promise(res => {
+    const p = panPts[side];
+    const top = svgToScreen(p.x, p.y - 45), land = svgToScreen(p.x, p.y + 150 + 6);
+    const el = document.createElement('div');
+    el.className = 'fly'; el.innerHTML = text;
+    document.body.appendChild(el);
+    const at = (pt, sc, rot) => `translate(${pt.x}px,${pt.y}px) translate(-50%,-50%) scale(${sc}) rotate(${rot}deg)`;
+    const anim = el.animate([
+      {transform: at(from,1,0), offset:0},
+      {transform: at(top,1.25,-6), offset:.55, easing:'cubic-bezier(.5,0,.9,.4)'},
+      {transform: at(land,.9,4), offset:1}
+    ], {duration:1000, fill:'forwards'});
+    anim.onfinish = () => { el.remove(); smoke(land); res(); };
+  });
+}
+function smoke(pt){
+  for (let k = 0; k < 9; k++){
+    const d = document.createElement('div'); d.className = 'puff';
+    document.body.appendChild(d);
+    const ang = Math.PI * (1 + Math.random()), dist = 30 + Math.random()*40;
+    const dx = Math.cos(ang)*dist, dy = Math.sin(ang)*dist - 10;
+    const base = `translate(${pt.x-17}px,${pt.y-17}px)`;
+    d.animate([
+      {transform: base + ' scale(.3)', opacity:.95},
+      {transform: `translate(${pt.x-17+dx}px,${pt.y-17+dy}px) scale(${1.6+Math.random()})`, opacity:0}
+    ], {duration:700+Math.random()*300, easing:'ease-out', fill:'forwards'}).onfinish = () => d.remove();
+  }
+}
+document.getElementById('distributeBtn').onclick = async () => {
+  if (opMode === 'none' || busy) return;
+  busy = true;
+  const btn = document.getElementById('distributeBtn'); btn.disabled = true;
+  const slot = document.getElementById({add:'slotAdd', addx:'slotX', mul:'slotMul'}[opMode]);
+  const r = slot.getBoundingClientRect();
+  const from = {x:r.left + r.width/2, y:r.top + r.height/2};
+  let label;
+  if (opMode === 'add') label = (addVal >= 0 ? '+' : '−') + Math.abs(addVal);
+  else if (opMode === 'addx') label = (addX > 0 ? '+' : '−') + (Math.abs(addX)===1 ? '' : Math.abs(addX)) + 'x';
+  else label = mulK >= 2 ? '×' + mulK : '×' + fracHtml(1, Math.abs(mulK));
+  await Promise.all([flyTo(label, from, 'L'), flyTo(label, from, 'R')]);
+  let desc;
+  if (opMode === 'add'){
+    eq.B = fadd(eq.B, F(addVal)); eq.D = fadd(eq.D, F(addVal));
+    desc = (addVal>=0?'บวก':'ลบ') + 'ทั้งสองข้างด้วย ' + Math.abs(addVal);
+  } else if (opMode === 'addx'){
+    eq.A = fadd(eq.A, F(addX)); eq.C = fadd(eq.C, F(addX));
+    desc = (addX>0?'บวก':'ลบ') + 'ทั้งสองข้างด้วย ' + (Math.abs(addX)===1 ? '' : Math.abs(addX)) + 'x';
+  } else {
+    const k = mulK >= 2 ? F(mulK) : F(1, -mulK);
+    eq.A = fmul(eq.A,k); eq.B = fmul(eq.B,k); eq.C = fmul(eq.C,k); eq.D = fmul(eq.D,k);
+    desc = 'คูณทั้งสองข้างด้วย ' + (mulK >= 2 ? mulK : fracHtml(1, -mulK));
+  }
+  steps.push(desc + '  →  ' + fmtExpr(eq.A, eq.B) + ' = ' + fmtExpr(eq.C, eq.D));
+  opMode = 'none'; addVal = 1; addX = 1; mulK = 2;
+  updateOpUI(); updateEqNow();
+  document.getElementById('feedback').className = '';
+  pulseScale();
+  busy = false;
+};
+
+document.getElementById('stepsBtn').onclick = () => {
+  const box = document.getElementById('steps');
+  const list = document.getElementById('stepsList');
+  box.classList.toggle('show');
+  if (box.classList.contains('show')){
+    list.innerHTML = steps.length
+      ? steps.map(s => '<li>' + s + '</li>').join('')
+      : '<li>ยังไม่มีการดำเนินการ — ลองแจกแจงทีละขั้น</li>';
+  }
+};
+
+document.getElementById('checkBtn').onclick = () => {
+  const fb = document.getElementById('feedback');
+  const one = f => f.d === 1 && Math.abs(f.n) === 1;
+  const inv = f => F(f.d, f.n);
+  const neg = f => F(-f.n, f.d);
+  const isolatedLeft  = !fz(eq.A) && fz(eq.C) && one(eq.A);
+  const isolatedRight = !fz(eq.C) && fz(eq.A) && one(eq.C);
+  let done = false, val = null;
+  if (isolatedLeft){ val = fmul(fadd(eq.D, neg(eq.B)), inv(eq.A)); done = true; }
+  else if (isolatedRight){ val = fmul(fadd(eq.B, neg(eq.D)), inv(eq.C)); done = true; }
+  if (done){
+    fb.innerHTML = 'ถูกต้อง! x = ' + fHtml(val);
+    fb.className = 'ok';
+  } else {
+    fb.textContent = 'ยังไม่เสร็จ — ลองแจกแจงต่ออีกขั้นเพื่อแยก x ให้อยู่ลำพังข้างใดข้างหนึ่ง';
+    fb.className = 'pending';
+  }
+};
+
+/* ---------- ตาชั่ง (เชิงสัญลักษณ์ ไม่เฉลยค่า) ---------- */
+let pulseT = 0;
+function pulseScale(){ pulseT = 14; }
+function drawScale(t){
+  const cx=260, pivotY=70, half=110, drop=150, w=90;
+  const sway = Math.sin(t/900) * (locked ? 1.3 : 0.5);
+  const kick = pulseT > 0 ? Math.sin(pulseT*0.9) * (pulseT/14) * 3 : 0;
+  angle = sway + kick;
+  if (pulseT > 0) pulseT -= 1;
+  const rad = angle*Math.PI/180;
+  const ex = half*Math.cos(rad), ey = half*Math.sin(rad);
+  const lx=cx-ex, ly=pivotY-ey, rx=cx+ex, ry=pivotY+ey;
+  let h = `<line x1="${lx}" y1="${ly}" x2="${rx}" y2="${ry}" stroke="var(--beam)" stroke-width="10" stroke-linecap="round"/>
+    <line x1="${lx}" y1="${ly-1.5}" x2="${rx}" y2="${ry-1.5}" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>`;
+  panPts.L = {x:lx,y:ly}; panPts.R = {x:rx,y:ry};
+  h += pan(lx,ly,drop,w,'L') + pan(rx,ry,drop,w,'R');
+  const dot = locked ? 'var(--green)' : 'var(--dot-off)';
+  h += `<circle cx="${lx}" cy="${ly}" r="7" fill="${dot}" stroke="#fff" stroke-width="2"/>
+        <circle cx="${rx}" cy="${ry}" r="7" fill="${dot}" stroke="#fff" stroke-width="2"/>
+        <circle cx="${cx}" cy="${pivotY}" r="12" fill="${dot}" stroke="#fff" stroke-width="3"/>`;
+  dyn.innerHTML = h;
+  document.getElementById('scaleStatus').textContent = locked
+    ? 'สมการสมดุลเสมอในทุกขั้นตอนที่แจกแจงถูกต้อง'
+    : 'ยังไม่ได้ตั้งสมการ';
+}
+function svgLabel(mx, cy, fs, f, suf, col){
+  const sign = f.n < 0 ? '-' : '', a = Math.abs(f.n);
+  const base = `font-weight="800" text-anchor="middle" fill="${col}"`;
+  if (f.d === 1){
+    const t = sign + ((suf && a === 1) ? '' : a) + suf;
+    return `<text x="${mx}" y="${cy+fs*.35}" font-size="${fs}" ${base}>${t}</text>`;
+  }
+  const f2 = fs*.66, fw = f2*.62*Math.max(String(a).length, String(f.d).length) + 4;
+  const sw = sign ? f2*.7 : 0, uw = suf ? f2*1.1 : 0, tot = sw + fw + uw;
+  const sx = mx - tot/2;
+  let h = '';
+  if (sign) h += `<text x="${sx+sw/2}" y="${cy+f2*.35}" font-size="${f2*1.1}" ${base}>-</text>`;
+  const fx = sx + sw;
+  h += `<text x="${fx+fw/2}" y="${cy-f2*.18}" font-size="${f2}" ${base}>${a}</text>
+    <line x1="${fx}" y1="${cy}" x2="${fx+fw}" y2="${cy}" stroke="${col}" stroke-width="2"/>
+    <text x="${fx+fw/2}" y="${cy+f2*.85}" font-size="${f2}" ${base}>${f.d}</text>`;
+  if (suf) h += `<text x="${fx+fw+uw/2}" y="${cy+f2*.4}" font-size="${f2*1.2}" ${base}>${suf}</text>`;
+  return h;
+}
+function blocks(px, y, vx, vn){
+  vx = toF(vx); vn = toF(vn);
+  const items = [];
+  if (!fz(vx)) items.push({sq:true, f:vx, g: vx.n>0?'gpx':'gnx', col: vx.n>0?'#fff':'#5a4300', suf:'x'});
+  if (!fz(vn)) items.push({sq:false, f:vn, g: vn.n>0?'gp1':'gn1', col:'#fff', suf:''});
+  if (!items.length) return '';
+  items.forEach(it => { it.s = Math.max(40, Math.min(84, 24 + 16*Math.sqrt(Math.abs(fnum(it.f))))); });
+  const gap = 8, total = items.reduce((a,it)=>a+it.s,0) + gap*(items.length-1);
+  let cx = px - total/2, h = '';
+  for (const it of items){
+    const mx = cx + it.s/2, top = y - it.s + 6;
+    const fs = Math.max(14, it.s*0.42);
+    h += it.sq
+      ? `<rect x="${cx}" y="${top}" width="${it.s}" height="${it.s}" rx="${it.s*0.2}" fill="url(#${it.g})" stroke="#fff" stroke-opacity=".75" stroke-width="3" filter="url(#sh)"/>`
+      : `<circle cx="${mx}" cy="${top+it.s/2}" r="${it.s/2}" fill="url(#${it.g})" stroke="#fff" stroke-opacity=".75" stroke-width="3" filter="url(#sh)"/>`;
+    h += svgLabel(mx, top+it.s/2, fs, it.f, it.suf, it.col);
+    cx += it.s + gap;
+  }
+  return h;
+}
+function pan(px,py,drop,w,side){
+  const y = py+drop;
+  let h = `<line x1="${px}" y1="${py}" x2="${px-w}" y2="${y}" stroke="var(--string)" stroke-width="2.5"/>
+    <line x1="${px}" y1="${py}" x2="${px+w}" y2="${y}" stroke="var(--string)" stroke-width="2.5"/>
+    <path d="M${px-w-8},${y} Q${px},${y+42} ${px+w+8},${y} Z" fill="${hoverZone===side&&drag?'var(--green-pale)':'var(--pan)'}" stroke="${hoverZone===side&&drag?'var(--green)':'var(--metal-stroke)'}" stroke-width="4" filter="url(#sh)"/>`;
+  let vx = 0, vn = 0;
+  if (locked && eq){ vx = side==='L'?eq.A:eq.C; vn = side==='L'?eq.B:eq.D; }
+  else if (!locked){ const s2 = side==='L'?L:R; vx = s2.x; vn = s2.n; }
+  h += blocks(px, y, vx, vn);
+  return h;
+}
+function loop(t){ drawScale(t); requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+
+renderChips('L'); renderChips('R');
+
+/* ---------- ธีม / ดีไซน์ ---------- */
+const THEMES = [
+  ['original','☁️ ดั้งเดิม'], ['sea','🌊 ทะเล'], ['night','🌙 ท้องฟ้ากลางคืน'],
+  ['candy','🍬 ลูกกวาด'], ['chalk','🧑‍🏫 กระดานดำ']
+];
+const deco = document.getElementById('deco');
+const rnd = (a,b) => a + Math.random()*(b-a);
+function wavePath(y, amp, col, op){
+  const p = `M0 ${y} Q150 ${y-amp} 300 ${y} T600 ${y} T900 ${y} T1200 ${y} V120 H0Z`;
+  return `<path d="${p}" fill="${col}" opacity="${op}"/><path d="${p}" transform="translate(1200 0)" fill="${col}" opacity="${op}"/>`;
+}
+function buildDeco(name){
+  let h = '';
+  if (name === 'original'){
+    [[8,12,140,.9,60],[62,6,180,.8,80],[30,70,160,.6,70],[75,60,120,.7,50]].forEach(([l,t,w,o,d],i)=>{
+      h += `<div class="cloud" style="left:${l}%;top:${t}%;width:${w}px;height:${w*.32}px;opacity:${o};animation-duration:${d}s;animation-delay:-${i*13}s"></div>`;
+    });
+  } else if (name === 'sea'){
+    for (let k=0;k<16;k++){
+      const sz = rnd(6,22);
+      h += `<div class="bubble" style="left:${rnd(0,100)}%;width:${sz}px;height:${sz}px;animation-duration:${rnd(8,18)}s;animation-delay:-${rnd(0,16)}s"></div>`;
+    }
+    h += `<svg class="wave w1" viewBox="0 0 2400 120" preserveAspectRatio="none">${wavePath(60,50,'#0f7fa6',.45)}</svg>
+      <svg class="wave w2" viewBox="0 0 2400 120" preserveAspectRatio="none">${wavePath(70,40,'#0a5f86',.55)}</svg>`;
+  } else if (name === 'night'){
+    for (let k=0;k<70;k++){
+      const sz = rnd(1,3.2);
+      h += `<i class="star" style="left:${rnd(0,100)}%;top:${rnd(0,100)}%;width:${sz}px;height:${sz}px;animation-duration:${rnd(2,6)}s;animation-delay:-${rnd(0,6)}s"></i>`;
+    }
+    h += '<div class="moon"></div><div class="shoot"></div>';
+  } else if (name === 'candy'){
+    const cols = ['#ffb3d1','#d6b8ff','#b8dcff','#ffe0a8','#c4f0d6'];
+    for (let k=0;k<18;k++){
+      const sz = rnd(16,60);
+      h += `<div class="candy" style="left:${rnd(0,100)}%;width:${sz}px;height:${sz}px;background:${cols[k%5]};animation-duration:${rnd(14,30)}s;animation-delay:-${rnd(0,30)}s"></div>`;
+    }
+  } else if (name === 'chalk'){
+    ['x + 2 = 5','3x − 1','2(x+1)','½','x = ?','= 7','−x','∑','÷','π'].forEach(t=>{
+      h += `<div class="doodle" style="left:${rnd(2,85)}%;top:${rnd(3,92)}%;font-size:${rnd(18,40)}px;transform:rotate(${rnd(-14,14)}deg)">${t}</div>`;
+    });
+  }
+  deco.innerHTML = h;
+}
+function setTheme(name){
+  document.documentElement.dataset.theme = name;
+  buildDeco(name);
+  document.querySelectorAll('.tpill').forEach(b => b.classList.toggle('on', b.dataset.t === name));
+  try { localStorage.setItem('eqTheme', name); } catch(e){}
+}
+const bar = document.getElementById('themeBar');
+THEMES.forEach(([k,label]) => {
+  const b = document.createElement('button');
+  b.className = 'tpill'; b.dataset.t = k; b.textContent = label;
+  b.onclick = () => setTheme(k);
+  bar.appendChild(b);
+});
+let startTheme = 'original';
+try { const t = localStorage.getItem('eqTheme'); if (t && THEMES.some(x=>x[0]===t)) startTheme = t; } catch(e){}
+setTheme(startTheme);
+</script>
+</body>
+</html>
